@@ -213,10 +213,10 @@ if(WIN32)
   endif()
 
   install(CODE "include(BundleUtilities)
-                fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/Forkserf.exe\" \"\" \"${BIN_DIRS}\")")
+                fixup_bundle(\"\\${CMAKE_INSTALL_PREFIX}/Forkserf.exe\" \"\" \"${BIN_DIRS}\")")
 elseif(APPLE)
   install(CODE "include(BundleUtilities)
-                fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/Forkserf.app\" \"\" \"\")")
+                fixup_bundle(\"\\${CMAKE_INSTALL_PREFIX}/Forkserf.app\" \"\" \"\")")
 endif()
 
 set(CPACK_RESOURCE_FILE_LICENSE ${PROJECT_SOURCE_DIR}/COPYING)
@@ -255,6 +255,10 @@ include(CPack)
 add_custom_command(TARGET Forkserf POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy
                        ${CMAKE_SOURCE_DIR}/custom_graphics/meta.ini $<TARGET_FILE_DIR:Forkserf>)
+# custom terrain / map_ground graphics
+add_custom_command(TARGET Forkserf POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_SOURCE_DIR}/custom_graphics/map_ground $<TARGET_FILE_DIR:Forkserf>/map_ground)
 # custom tree graphics for spring, fall, winter
 add_custom_command(TARGET Forkserf POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
