@@ -31,6 +31,7 @@
 #include "src/data-source-dos.h"
 #include "src/data-source-amiga.h"
 #include "src/data-source-custom.h"
+#include "src/data-source-overlay.h"
 
 #ifdef _WIN32
 // need for GetModuleFileName
@@ -101,7 +102,7 @@ Data::load(const std::string &path) {
   // If it is possible, prefer DOS game data.
   typedef std::function<Data::PSource(const std::string &)> SourceFactory;
   std::vector<SourceFactory> sources_factories;
-  // reversing the original order (Custom, DOS, Amiga) 
+  // reversing the original order (Custom, DOS, Amiga)
   //  because instead of breaking as soon as one is found, I want to load
   //   everything found and prefer the last one found
   /*
@@ -112,7 +113,7 @@ Data::load(const std::string &path) {
   sources_factories.push_back([](const std::string &path)->Data::PSource{
     return std::make_shared<DataSourceAmiga>(path); });
     */
-  
+
   sources_factories.push_back([](const std::string &path)->Data::PSource{
     return std::make_shared<DataSourceAmiga>(path); });
   sources_factories.push_back([](const std::string &path)->Data::PSource{
@@ -171,6 +172,14 @@ Data::load(const std::string &path) {
 //      break;
 //    }
     source_type++;
+  }
+
+  // Settlers 1.0: use custom PNG resources for ordinary sprite IDs when
+  // available, while retaining DOS/Amiga as an incremental fallback.
+  if (data_source_Custom && data_source) {
+    Log::Info["data"] << "enabling custom-first resource overlay";
+    data_source = std::make_shared<DataSourceOverlay>(data_source_Custom,
+                                                       data_source);
   }
 
   // "choose" the last one found
